@@ -21,26 +21,33 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
-    final String NAME = "king";
-    final String PASSWORD = "1234";
-    final String NICKNAME = "덩도";
-    final Long ID = 1L;
-    final Admin ADMIN = Admin.USER;
-
-    User user = User.builder()
-            .username(NAME)
-            .password(PASSWORD)
-            .admin(ADMIN)
-            .id(ID)
-            .nickname(NICKNAME)
-            .roles(Collections.singletonList("ROLE_USER"))
-            .build();
+//    final String NAME = "king";
+//    final String PASSWORD = "1234";
+//    final String NICKNAME = "덩도";
+//    final Long ID = 1L;
+//    final Admin ADMIN = Admin.USER;
+//
+//    User user = User.builder()
+//            .username(NAME)
+//            .password(PASSWORD)
+//            .admin(ADMIN)
+//            .id(ID)
+//            .nickname(NICKNAME)
+//            .roles(Collections.singletonList("ROLE_USER"))
+//            .build();
 
     @PostMapping("/join")
-    public String join() {
-        userRepository.save(user);
+    public String join(@RequestBody Map<String, String> user) {
+        User saveUser = User.builder()
+                .username(user.get("username"))
+                .password(user.get("password"))
+                .admin(Admin.USER)
+                .nickname(user.get("nickname"))
+                .roles(Collections.singletonList("ROLE_USER"))
+                .build();
+        userRepository.save(saveUser);
         log.info("회원가입 완료");
-        return user.toString();
+        return saveUser.getUsername();
     }
 
     // 로그인
