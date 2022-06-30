@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 
 @RequiredArgsConstructor
+// 요청을 가로채서 토큰의 유효성 판단하는 클래스 => 유효성 확인 시 요청 진행
 public class JwtAuthenticationFilter extends GenericFilterBean {
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -19,7 +20,7 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
         String token = jwtTokenProvider.resolveToken((HttpServletRequest) request);
         // 유효한지 확인
         if(token != null && jwtTokenProvider.validateToken(token)) {
-            // 유효성 확인 후 유저정보 가져오기
+            // 유효성 확인 후 토큰에서 유저정보 가져오기
             Authentication authentication = jwtTokenProvider.getAuthentication(token);
             // SecurityContext 에 Authentication 객체 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);

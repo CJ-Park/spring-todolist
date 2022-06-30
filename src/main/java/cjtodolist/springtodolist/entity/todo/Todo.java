@@ -19,6 +19,7 @@ import javax.persistence.Id;
 public class Todo extends BaseTimeEntity {
 
     @Id @GeneratedValue
+    @Column(name = "todo_id")
     private Long id;
 
     @Column(nullable = false)

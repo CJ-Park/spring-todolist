@@ -22,6 +22,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Component
+// JWT 토큰 생성 클래스
 public class JwtTokenProvider {
     private String secretKey = "mySecretKeyasdfasdfAWfawlkfnawljnasfasfsawgs";
 
@@ -44,10 +45,10 @@ public class JwtTokenProvider {
         claims.put("roles", roles);
         Date now = new Date();
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime() + tokenValidTime))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setClaims(claims)  // 정보 저장
+                .setIssuedAt(now)   // 토큰 발행 시간
+                .setExpiration(new Date(now.getTime() + tokenValidTime))    // 토큰 만료 시간
+                .signWith(key, SignatureAlgorithm.HS256)    // signature 에 들어갈 key 값과 사용할 암호화 알고리즘 선택
                 .compact();
     }
 

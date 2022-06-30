@@ -21,21 +21,6 @@ public class UserController {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserRepository userRepository;
 
-//    final String NAME = "king";
-//    final String PASSWORD = "1234";
-//    final String NICKNAME = "덩도";
-//    final Long ID = 1L;
-//    final Admin ADMIN = Admin.USER;
-//
-//    User user = User.builder()
-//            .username(NAME)
-//            .password(PASSWORD)
-//            .admin(ADMIN)
-//            .id(ID)
-//            .nickname(NICKNAME)
-//            .roles(Collections.singletonList("ROLE_USER"))
-//            .build();
-
     @PostMapping("/join")
     public String join(@RequestBody Map<String, String> user) {
         User saveUser = User.builder()
@@ -56,6 +41,9 @@ public class UserController {
         log.info("username = {}", user.get("username"));
         User user1 = userRepository.findByUsername(user.get("username"))
                 .orElseThrow(()->new IllegalArgumentException("가입되지 않은 USERNAME 입니다"));
+        if(!user.get("password").equals(user1.getPassword())) {
+            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+        }
 
         return jwtTokenProvider.createToken(user1.getUsername(), user1.getRoles());
     }

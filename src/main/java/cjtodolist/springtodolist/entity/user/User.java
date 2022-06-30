@@ -1,5 +1,6 @@
 package cjtodolist.springtodolist.entity.user;
 
+import cjtodolist.springtodolist.entity.todo.Todo;
 import cjtodolist.springtodolist.entity.user.Admin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,9 +50,7 @@ public class User implements UserDetails {
     }
 
     @Override
-    public String getPassword() {
-        return null;
-    }
+    public String getPassword() { return password; }
 
     @Override
     public boolean isAccountNonExpired() {
