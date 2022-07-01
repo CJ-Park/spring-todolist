@@ -1,17 +1,19 @@
 package cjtodolist.springtodolist.controller;
 
+import cjtodolist.springtodolist.DTO.UserJoinDto;
+import cjtodolist.springtodolist.DTO.UserLoginDto;
 import cjtodolist.springtodolist.config.JwtTokenProvider;
-import cjtodolist.springtodolist.entity.user.Admin;
 import cjtodolist.springtodolist.entity.user.User;
-import cjtodolist.springtodolist.entity.user.UserRepository;
+import cjtodolist.springtodolist.service.users.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Collections;
-import java.util.Map;
 
 @Slf4j
 @RestController
@@ -19,32 +21,35 @@ import java.util.Map;
 public class UserController {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
+    private final UserService userService;
 
+    // 회원 가입
     @PostMapping("/join")
-    public String join(@RequestBody Map<String, String> user) {
-        User saveUser = User.builder()
-                .username(user.get("username"))
-                .password(user.get("password"))
-                .admin(Admin.USER)
-                .nickname(user.get("nickname"))
-                .roles(Collections.singletonList("ROLE_USER"))
-                .build();
-        userRepository.save(saveUser);
-        log.info("회원가입 완료");
-        return saveUser.getUsername();
+    public ResponseEntity<String> join (@RequestBody UserJoinDto userJoinDto) {
+        if(ObjectUtils.isEmpty(userJoinDto.getUsername())){
+            return new ResponseEntity<>("가입 시 username 은 필수입니다.", HttpStatus.BAD_REQUEST);
+        }
+        if(ObjectUtils.isEmpty(userJoinDto.getPassword())){
+            return new ResponseEntity<>("가입 시 password 는 필수입니다.", HttpStatus.BAD_REQUEST);
+        }
+        if(ObjectUtils.isEmpty(userJoinDto.getNickname())){
+            return new ResponseEntity<>("가입 시 nickname 은 필수입니다.", HttpStatus.BAD_REQUEST);
+        }
+
+        if(userService.isDuplicateUsername(userJoinDto)) {
+            return new ResponseEntity<>("이미 존재하는 username 입니다", HttpStatus.BAD_REQUEST);
+        }
+
+        String nickname = userService.add(userJoinDto).getNickname();
+        return new ResponseEntity<>(nickname + " 님 가입 성공", HttpStatus.OK);
+
     }
 
     // 로그인
     @PostMapping("/login")
-    public String login(@RequestBody Map<String, String> user) {
-        log.info("username = {}", user.get("username"));
-        User user1 = userRepository.findByUsername(user.get("username"))
-                .orElseThrow(()->new IllegalArgumentException("가입되지 않은 USERNAME 입니다"));
-        if(!user.get("password").equals(user1.getPassword())) {
-            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
-        }
-
-        return jwtTokenProvider.createToken(user1.getUsername(), user1.getRoles());
+    public ResponseEntity<String> login (@RequestBody UserLoginDto userLoginDto) {
+        User findUser = userService.validateUser(userLoginDto);
+        String token = jwtTokenProvider.createToken(findUser.getUsername(), findUser.getRoles());
+        return ResponseEntity.ok(token);
     }
 }
