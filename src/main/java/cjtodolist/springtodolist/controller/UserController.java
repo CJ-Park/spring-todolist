@@ -1,7 +1,7 @@
 package cjtodolist.springtodolist.controller;
 
 import cjtodolist.springtodolist.DTO.UserJoinDto;
-import cjtodolist.springtodolist.DTO.UserLoginDto;
+import cjtodolist.springtodolist.DTO.UserDto;
 import cjtodolist.springtodolist.config.JwtTokenProvider;
 import cjtodolist.springtodolist.entity.user.User;
 import cjtodolist.springtodolist.service.users.UserService;
@@ -10,10 +10,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -47,9 +46,23 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> login (@RequestBody UserLoginDto userLoginDto) {
-        User findUser = userService.validateUser(userLoginDto);
+    public ResponseEntity<String> login (@RequestBody UserDto userDto) {
+        User findUser = userService.validateUser(userDto);
         String token = jwtTokenProvider.createToken(findUser.getUsername(), findUser.getRoles());
         return ResponseEntity.ok(token);
+    }
+
+    // 비밀번호 수정 -> 수정 전 발급 토큰 만료 불가 -> 방법 찾아보기
+    @PutMapping("/pw-change")
+    public ResponseEntity<String> changePw (@RequestBody UserDto userDto) {
+        String userNickname = userService.update(userDto).getNickname();
+        return ResponseEntity.ok(userNickname + " 님의 비밀번호가 변경되었습니다.");
+    }
+
+    // 회원 탈퇴 -> 이것도 토큰 만료 시키기 불가
+    @DeleteMapping("/quit")
+    public ResponseEntity<String> quit (@RequestBody UserDto userDto) {
+        userService.delete(userDto);
+        return ResponseEntity.ok("정상적으로 탈퇴 완료되었습니다.");
     }
 }

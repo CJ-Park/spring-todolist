@@ -10,11 +10,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserLoginDto {
+public class UserDto {
     private String username;
     private String password;
 
-    public UserLoginDto(User user){
+    public UserDto(User user){
         this.username = user.getUsername();
         this.password = user.getPassword();
     }

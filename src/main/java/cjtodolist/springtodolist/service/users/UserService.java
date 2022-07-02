@@ -1,7 +1,7 @@
 package cjtodolist.springtodolist.service.users;
 
 import cjtodolist.springtodolist.DTO.UserJoinDto;
-import cjtodolist.springtodolist.DTO.UserLoginDto;
+import cjtodolist.springtodolist.DTO.UserDto;
 import cjtodolist.springtodolist.entity.user.User;
 import cjtodolist.springtodolist.entity.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +23,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User validateUser(UserLoginDto userLoginDto) {
-        User findUser = userRepository.findByUsername(userLoginDto.getUsername())
-                .orElseThrow(()->new IllegalArgumentException("존재하지 않는 ID 입니다."));
-        if(!userLoginDto.getPassword().equals(findUser.getPassword())) {
+    public User validateUser(UserDto userDto) {
+        User findUser = userRepository.findByUsername(userDto.getUsername())
+                .orElseThrow(()-> {throw new IllegalArgumentException("존재하지 않는 ID 입니다.");});
+        if(!userDto.getPassword().equals(findUser.getPassword())) {
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
 
@@ -40,5 +40,21 @@ public class UserService {
         else {
             return true;
         }
+    }
+
+    public User update(UserDto userDto) {
+        User updateUser = userRepository.findByUsername(userDto.getUsername())
+                .orElseThrow(()-> {throw new IllegalArgumentException("존재하지 않는 ID 입니다.");});
+        updateUser.changePw(userDto.getPassword());
+        return userRepository.save(updateUser);
+    }
+
+    public void delete(UserDto userDto) {
+        User deleteUser = userRepository.findByUsername(userDto.getUsername())
+                .orElseThrow(()->{throw new IllegalArgumentException("존재하지 않는 ID 입니다.");});
+        if(!userDto.getPassword().equals(deleteUser.getPassword())) {
+            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+        }
+        userRepository.delete(deleteUser);
     }
 }
