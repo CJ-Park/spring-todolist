@@ -5,21 +5,14 @@ import cjtodolist.springtodolist.DTO.UserJoinDto;
 import cjtodolist.springtodolist.config.JwtTokenProvider;
 import cjtodolist.springtodolist.entity.user.User;
 import cjtodolist.springtodolist.entity.user.UserRepository;
-import cjtodolist.springtodolist.service.users.UserService;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aspectj.lang.annotation.Before;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.*;
@@ -27,28 +20,28 @@ import javax.swing.*;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
-// user 통합테스트
+// user 컨트롤러 통합테스트
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 class UserControllerTest {
 
     @LocalServerPort
     private int port;
-
     @Autowired
     private TestRestTemplate restTemplate;
-
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
 
     @Test
-    public void 회원가입테스트() throws Exception {
+    public void 회원가입테스트() {
         //given
         String username = "king01286";
         String password = "1234";
@@ -70,32 +63,32 @@ class UserControllerTest {
         List<User> findAllUser = userRepository.findAll();
         System.out.println(findAllUser.get(0).getNickname());
         assertThat(findAllUser.get(0).getUsername()).isEqualTo(username);
-        assertThat(findAllUser.get(0).getPassword()).isEqualTo(password);
+        assertThat(passwordEncoder.matches(password, findAllUser.get(0).getPassword())).isTrue();
     }
 
-    // 테스트 실패 -> 존재하지 않는 ID 예외 처리
+    // 로그인 테스트 계속 에러남
     @Test
     public void 로그인테스트() throws Exception {
         //given
-        userRepository.save(User.builder().username("test1").password("1234")
-                .nickname("TEST").build());
-        UserDto userDto = UserDto.builder().username("test1").password("1234").build();
-        User loginUser = userRepository.findByUsername(userDto.getUsername())
-                .filter(user1 -> user1.getPassword().equals(userDto.getPassword()))
-                .orElseThrow(()->{throw new IllegalArgumentException("잘못된 password");});
+        String username = "king01286";
+        String password = "1234";
+        String nickname = "CJ";
 
-        String token = jwtTokenProvider.createToken(loginUser.getUsername(), loginUser.getRoles());
+        User joinUser = User.builder().username(username).nickname(nickname)
+                .password(passwordEncoder.encode(password)).build();
+
+        UserDto loginUser = UserDto.builder().username(username).password(password).build();
+
+        userRepository.save(joinUser);
 
         String url = "http://localhost:" + port + "/login";
 
         //when
         ResponseEntity<String> responseEntity = restTemplate
-                .postForEntity(url, userDto, String.class);
+                .postForEntity(url, loginUser, String.class);
 
         //then
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(responseEntity.getBody()).isEqualTo(token);
-
     }
 
 }

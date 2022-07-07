@@ -6,10 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
@@ -18,7 +15,8 @@ import javax.persistence.Id;
 @AllArgsConstructor
 public class Todo extends BaseTimeEntity {
 
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "todo_id")
     private Long id;
 
@@ -26,18 +24,15 @@ public class Todo extends BaseTimeEntity {
     private String content;
 
     @Column(nullable = false)
-    private Boolean completed;
+    @Enumerated(EnumType.STRING)
+    private State state;
 
     // 투두 수정
     public void updateContent(String newContent) {
         this.content = newContent;
     }
 
-    public void updateComplete(Boolean newComplete){
-        this.completed = newComplete;
-    }
-
-    public void isCompleted(){
-        this.completed = true;
+    public void updateState(State newState) {
+        this.state = newState;
     }
 }

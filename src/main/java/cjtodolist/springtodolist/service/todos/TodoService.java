@@ -1,5 +1,6 @@
 package cjtodolist.springtodolist.service.todos;
 
+import cjtodolist.springtodolist.entity.todo.State;
 import cjtodolist.springtodolist.entity.todo.Todo;
 import cjtodolist.springtodolist.entity.todo.TodoRepository;
 import cjtodolist.springtodolist.DTO.TodoDto;
@@ -9,50 +10,57 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+// response 객체로 바꾸기 / 리턴값 확인
 
 @RequiredArgsConstructor
 @Service
 public class TodoService {
     private final TodoRepository todoRepository;
 
-    public Todo add(TodoDto todoDto) {
+    public void add(TodoDto todoDto) {
         Todo todo = Todo.builder()
                 .content(todoDto.getContent())
-                .completed(todoDto.getCompleted())
+                .state(State.READY)
                 .build();
-        return todoRepository.save(todo);
+        todoRepository.save(todo);
     }
 
     public Todo searchById(Long id) {
         return todoRepository.findById(id)
-                .orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
-    public List<Todo> searchAll() {
-        return todoRepository.findAll();
+    public List<TodoDto> searchAll() {
+        List<Todo> all = todoRepository.findAll();
+        return all.stream()
+                .map(result -> new TodoDto(result))
+                .collect(Collectors.toList());
     }
 
-    public Todo updateById(Long id, TodoDto todoDto) {
+    public TodoDto updateById(Long id, TodoDto todoDto) {
         Todo todo = searchById(id);
 
-        if(todoDto.getContent() != null){
-            todo.updateContent(todoDto.getContent());
-        }
+        todo.updateContent(todoDto.getContent());
+        todo.updateState(todoDto.getState());
 
-        if(todoDto.getCompleted() != null){
-            todo.updateComplete(todoDto.getCompleted());
-        }
-
-        return todoRepository.save(todo);
+        return new TodoDto(todoRepository.save(todo));
     }
 
-    public Todo isCompleted(Long id) {
+    public void ongoingById(Long id) {
         Todo todo = searchById(id);
-        if(todo.getCompleted() == false){
-            todo.isCompleted();
-        }
-        return todoRepository.save(todo);
+        todo.updateState(State.ONGOING);
+        todoRepository.save(todo);
     }
+
+    public void completeById(Long id) {
+        Todo todo = searchById(id);
+        todo.updateState(State.COMPLETE);
+        todoRepository.save(todo);
+    }
+
 
     public void deleteById(Long id) {
         todoRepository.deleteById(id);

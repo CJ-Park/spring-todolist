@@ -20,19 +20,14 @@ public class TodoController {
     private final TodoService todoService;
 
     @PostMapping
-    public ResponseEntity<TodoDto> create(@RequestBody TodoDto todoDto) {
-        if(ObjectUtils.isEmpty(todoDto.getContent())) {
+    public ResponseEntity<String> create(@RequestBody TodoDto todoDto) {
+        if (ObjectUtils.isEmpty(todoDto.getContent())) {
             return ResponseEntity.badRequest().build();
         }
 
-        if(ObjectUtils.isEmpty(todoDto.getCompleted())) {
-            todoDto.setCompleted(false);
-        }
+        todoService.add(todoDto);
 
-        Todo result = todoService.add(todoDto);
-        TodoDto response = new TodoDto(result);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok("저장 완료!");
     }
 
     @GetMapping("/{id}")
@@ -45,28 +40,30 @@ public class TodoController {
 
     @GetMapping
     public ResponseEntity<List<TodoDto>> readAll() {
-        List<Todo> resultTodos = todoService.searchAll();
-        List<TodoDto> response = resultTodos.stream()
-                .map(result -> new TodoDto(result))
-                .collect(Collectors.toList());
+        List<TodoDto> response = todoService.searchAll();
 
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<TodoDto> update(@PathVariable Long id, @RequestBody TodoDto todoDto) {
-        Todo result = todoService.updateById(id, todoDto);
-        TodoDto response = new TodoDto(result);
+        TodoDto response = todoService.updateById(id, todoDto);
 
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/complete")
-    public ResponseEntity<TodoDto> complete(@PathVariable Long id){
-        Todo result = todoService.isCompleted(id);
-        TodoDto response = new TodoDto(result);
+    @PutMapping("{id}/ongoing")
+    public ResponseEntity<String> ongoing(@PathVariable Long id) {
+        todoService.ongoingById(id);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok("상태 수정 - 진행중");
+    }
+
+    @PutMapping("/{id}/complete")
+    public ResponseEntity<String> complete(@PathVariable Long id) {
+        todoService.completeById(id);
+
+        return ResponseEntity.ok("상태 수정 - 완료");
     }
 
     @DeleteMapping("/{id}")

@@ -24,18 +24,18 @@ public class UserController {
 
     // 회원 가입
     @PostMapping("/join")
-    public ResponseEntity<String> join (@RequestBody UserJoinDto userJoinDto) {
-        if(ObjectUtils.isEmpty(userJoinDto.getUsername())){
+    public ResponseEntity<String> join(@RequestBody UserJoinDto userJoinDto) {
+        if (ObjectUtils.isEmpty(userJoinDto.getUsername())) {
             return new ResponseEntity<>("가입 시 username 은 필수입니다.", HttpStatus.BAD_REQUEST);
         }
-        if(ObjectUtils.isEmpty(userJoinDto.getPassword())){
+        if (ObjectUtils.isEmpty(userJoinDto.getPassword())) {
             return new ResponseEntity<>("가입 시 password 는 필수입니다.", HttpStatus.BAD_REQUEST);
         }
-        if(ObjectUtils.isEmpty(userJoinDto.getNickname())){
+        if (ObjectUtils.isEmpty(userJoinDto.getNickname())) {
             return new ResponseEntity<>("가입 시 nickname 은 필수입니다.", HttpStatus.BAD_REQUEST);
         }
 
-        if(userService.isDuplicateUsername(userJoinDto)) {
+        if (userService.isDuplicateUsername(userJoinDto)) {
             return new ResponseEntity<>("이미 존재하는 username 입니다", HttpStatus.BAD_REQUEST);
         }
 
@@ -46,22 +46,22 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<String> login (@RequestBody UserDto userDto) {
+    public ResponseEntity<String> login(@RequestBody UserDto userDto) {
         User findUser = userService.validateUser(userDto);
         String token = jwtTokenProvider.createToken(findUser.getUsername(), findUser.getRoles());
         return ResponseEntity.ok(token);
     }
 
-    // 비밀번호 수정 -> 수정 전 발급 토큰 만료 불가 -> 방법 찾아보기
+    // 비밀번호 수정
     @PutMapping("/pw-change")
-    public ResponseEntity<String> changePw (@RequestBody UserDto userDto) {
-        String userNickname = userService.update(userDto).getNickname();
-        return ResponseEntity.ok(userNickname + " 님의 비밀번호가 변경되었습니다.");
+    public ResponseEntity<String> changePw(@RequestBody UserDto userDto) {
+        userService.update(userDto);
+        return ResponseEntity.ok("비밀번호가 변경되었습니다.");
     }
 
-    // 회원 탈퇴 -> 이것도 토큰 만료 시키기 불가
+    // 회원 탈퇴
     @DeleteMapping("/quit")
-    public ResponseEntity<String> quit (@RequestBody UserDto userDto) {
+    public ResponseEntity<String> quit(@RequestBody UserDto userDto) {
         userService.delete(userDto);
         return ResponseEntity.ok("정상적으로 탈퇴 완료되었습니다.");
     }

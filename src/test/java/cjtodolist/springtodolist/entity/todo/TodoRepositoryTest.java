@@ -1,15 +1,11 @@
 package cjtodolist.springtodolist.entity.todo;
 
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @Transactional
@@ -24,7 +20,7 @@ class TodoRepositoryTest {
         //given
         Todo todo = Todo.builder()
                 .content("test1")
-                .completed(false)
+                .state(State.READY)
                 .build();
 
 
@@ -34,7 +30,7 @@ class TodoRepositoryTest {
 
         //then
         assertThat(findTodo.getContent()).isEqualTo(todo.getContent());
-        assertThat(findTodo.getCompleted()).isEqualTo(todo.getCompleted());
+        assertThat(findTodo.getState()).isEqualTo(todo.getState());
     }
 
     // DELETE 테스트
@@ -43,7 +39,7 @@ class TodoRepositoryTest {
         //given
         Todo todo = Todo.builder()
                 .content("deleteTest")
-                .completed(false)
+                .state(State.READY)
                 .build();
 
         Long saveId = todoRepository.save(todo).getId();
@@ -62,8 +58,8 @@ class TodoRepositoryTest {
     @Test
     public void 투두전체삭제() throws Exception {
         //given
-        Todo todo1 = Todo.builder().content("todo1").completed(false).build();
-        Todo todo2 = Todo.builder().content("todo2").completed(false).build();
+        Todo todo2 = Todo.builder().content("todo2").state(State.READY).build();
+        Todo todo1 = Todo.builder().content("todo1").state(State.READY).build();
 
         todoRepository.save(todo1);
         todoRepository.save(todo2);
@@ -85,7 +81,7 @@ class TodoRepositoryTest {
         //given
         Todo todo = Todo.builder()
                 .content("Test")
-                .completed(false)
+                .state(State.READY)
                 .build();
 
         // 영속성 객체 자동 업데이트 사용 -> save 시 반환되는 객체로 update
@@ -93,12 +89,13 @@ class TodoRepositoryTest {
 
         //when
         String newContent = "updateTest";
+        State newState = State.COMPLETE;
         saveTodo.updateContent(newContent);
-        saveTodo.isCompleted();
+        saveTodo.updateState(newState);
 
         //then
         assertThat(saveTodo.getContent()).isEqualTo(newContent);
-        assertThat(saveTodo.getCompleted()).isEqualTo(true);
+        assertThat(saveTodo.getState()).isEqualTo(State.COMPLETE);
 
     }
 
@@ -108,7 +105,7 @@ class TodoRepositoryTest {
         //given
         Todo todo = Todo.builder()
                 .content("update2")
-                .completed(false)
+                .state(State.READY)
                 .build();
 
         Long saveId = todoRepository.save(todo).getId();
@@ -116,12 +113,12 @@ class TodoRepositoryTest {
 
         //when
         updateTodo.updateContent("newUpdate");
-        updateTodo.isCompleted();
+        updateTodo.updateState(State.COMPLETE);
         Todo update = todoRepository.save(updateTodo);
 
         //then
         assertThat(update.getContent()).isEqualTo(updateTodo.getContent());
-        assertThat(update.getCompleted()).isEqualTo(updateTodo.getCompleted());
+        assertThat(update.getState()).isEqualTo(updateTodo.getState());
 
     }
 }
