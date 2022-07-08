@@ -2,8 +2,6 @@ package cjtodolist.springtodolist.controller;
 
 import cjtodolist.springtodolist.DTO.UserJoinDto;
 import cjtodolist.springtodolist.DTO.UserDto;
-import cjtodolist.springtodolist.config.JwtTokenProvider;
-import cjtodolist.springtodolist.entity.user.User;
 import cjtodolist.springtodolist.service.users.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,14 +10,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class UserController {
 
-    private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
 
     // 회원 가입
@@ -36,20 +31,27 @@ public class UserController {
         }
 
         if (userService.isDuplicateUsername(userJoinDto)) {
-            return new ResponseEntity<>("이미 존재하는 username 입니다", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("이미 존재하는 username 입니다.", HttpStatus.BAD_REQUEST);
         }
 
-        String nickname = userService.add(userJoinDto).getNickname();
-        return new ResponseEntity<>(nickname + " 님 가입 성공", HttpStatus.OK);
+        userService.add(userJoinDto);
+        return new ResponseEntity<>("가입 성공", HttpStatus.OK);
 
     }
 
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody UserDto userDto) {
-        User findUser = userService.validateUser(userDto);
-        String token = jwtTokenProvider.createToken(findUser.getUsername(), findUser.getRoles());
-        return ResponseEntity.ok(token);
+        if (userService.validateUsername(userDto)) {
+            if (userService.validateUserPass(userDto)) {
+                String token = userService.getToken(userDto);
+                return ResponseEntity.ok(token);
+            } else {
+                return new ResponseEntity<>("비밀번호가 다릅니다.", HttpStatus.BAD_REQUEST);
+            }
+        } else {
+            return new ResponseEntity<>("존재하지 않는 username 입니다.", HttpStatus.BAD_REQUEST);
+        }
     }
 
     // 비밀번호 수정
