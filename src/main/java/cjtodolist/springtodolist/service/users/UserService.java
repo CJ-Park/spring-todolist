@@ -17,10 +17,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
     private final JwtTokenProvider jwtTokenProvider;
-
-    final
 
     public void add(UserJoinDto userJoinDto) {
         User user = User.builder()
@@ -57,9 +54,8 @@ public class UserService {
     public boolean isDuplicateUsername(UserJoinDto userJoinDto) {
         if (userRepository.findByUsername(userJoinDto.getUsername()).isEmpty()) {
             return false;
-        } else {
-            return true;
         }
+        return true;
     }
 
     public void update(UserDto userDto) {
