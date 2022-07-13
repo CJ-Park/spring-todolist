@@ -9,8 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
-// response 객체로 바꾸기 / 리턴값 확인 / 컨벤션 (코드 정렬)
+// 에러 커스텀하기
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -26,36 +25,26 @@ public class UserService {
                 .nickname(userJoinDto.getNickname())
                 .build();
 
+        isDuplicatedUser(userJoinDto);
+
         userRepository.save(user);
     }
 
-    public boolean validateUsername(UserDto userDto) {
-        if (userRepository.findByUsername(userDto.getUsername()).isEmpty()) {
-            return false;
-        }
-        return true;
-    }
-
-    public boolean validateUserPass(UserDto userDto) {
-        if (passwordEncoder.matches(userDto.getPassword(), userRepository.findByUsername(userDto.getUsername()).get().getPassword())) {
-            return true;
-        }
-        return false;
-    }
-
-    public String getToken(UserDto userDto) {
+    public String validateUser(UserDto userDto) {
         User findUser = userRepository.findByUsername(userDto.getUsername())
                 .orElseThrow(() -> {
                     throw new IllegalArgumentException("존재하지 않는 ID 입니다.");
                 });
+        if (!passwordEncoder.matches(userDto.getPassword(), findUser.getPassword())) {
+            throw new IllegalArgumentException("잘못된 비밀번호입니다.");
+        }
         return jwtTokenProvider.createToken(findUser.getUsername(), findUser.getRoles());
     }
 
-    public boolean isDuplicateUsername(UserJoinDto userJoinDto) {
-        if (userRepository.findByUsername(userJoinDto.getUsername()).isEmpty()) {
-            return false;
+    public void isDuplicatedUser(UserJoinDto userJoinDto) {
+        if (userRepository.findByUsername(userJoinDto.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("이미 사용중인 ID 입니다.");
         }
-        return true;
     }
 
     public void update(UserDto userDto) {
@@ -63,8 +52,7 @@ public class UserService {
                 .orElseThrow(() -> {
                     throw new IllegalArgumentException("존재하지 않는 ID 입니다.");
                 });
-        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
-        updateUser.changePw(encodedPassword);
+        updateUser.changePw(passwordEncoder.encode(userDto.getPassword()));
         userRepository.save(updateUser);
     }
 

@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// UserDetails 그대로 가져오는게 아닌 custom 해서 직접 구현해보기
 @Getter
 @NoArgsConstructor
 @Entity

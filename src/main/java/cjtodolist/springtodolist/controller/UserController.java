@@ -30,10 +30,6 @@ public class UserController {
             return new ResponseEntity<>("가입 시 nickname 은 필수입니다.", HttpStatus.BAD_REQUEST);
         }
 
-        if (userService.isDuplicateUsername(userJoinDto)) {
-            return new ResponseEntity<>("이미 존재하는 username 입니다.", HttpStatus.BAD_REQUEST);
-        }
-
         userService.add(userJoinDto);
         return new ResponseEntity<>("가입 성공", HttpStatus.OK);
 
@@ -42,16 +38,8 @@ public class UserController {
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody UserDto userDto) {
-        if (userService.validateUsername(userDto)) {
-            if (userService.validateUserPass(userDto)) {
-                String token = userService.getToken(userDto);
-                return ResponseEntity.ok(token);
-            } else {
-                return new ResponseEntity<>("비밀번호가 다릅니다.", HttpStatus.BAD_REQUEST);
-            }
-        } else {
-            return new ResponseEntity<>("존재하지 않는 username 입니다.", HttpStatus.BAD_REQUEST);
-        }
+        String token = userService.validateUser(userDto);
+        return ResponseEntity.ok(token);
     }
 
     // 비밀번호 수정

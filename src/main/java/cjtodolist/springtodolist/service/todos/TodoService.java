@@ -5,15 +5,12 @@ import cjtodolist.springtodolist.entity.todo.Todo;
 import cjtodolist.springtodolist.entity.todo.TodoRepository;
 import cjtodolist.springtodolist.DTO.TodoDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-// response 객체로 바꾸기 / 리턴값 확인
 
 @RequiredArgsConstructor
 @Service
@@ -28,9 +25,12 @@ public class TodoService {
         todoRepository.save(todo);
     }
 
-    public Todo searchById(Long id) {
-        return todoRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public TodoDto searchTodo(Long id) {
+        Todo findTodo = todoRepository.findById(id)
+                .orElseThrow(() -> {
+                    throw new IllegalArgumentException("존재하지 않는 Todo 입니다.");
+                });
+        return new TodoDto(findTodo);
     }
 
     public List<TodoDto> searchAll() {
@@ -40,25 +40,31 @@ public class TodoService {
                 .collect(Collectors.toList());
     }
 
-    public TodoDto updateById(Long id, TodoDto todoDto) {
-        Todo todo = searchById(id);
-
-        todo.updateContent(todoDto.getContent());
-        todo.updateState(todoDto.getState());
-
-        return new TodoDto(todoRepository.save(todo));
+    @Transactional
+    public void updateContent(Long id, TodoDto todoDto) {
+        Todo findTodo = todoRepository.findById(id)
+                .orElseThrow(() -> {
+                    throw new IllegalArgumentException("존재하지 않는 Todo 입니다.");
+                });
+        findTodo.updateContent(todoDto.getContent());
     }
 
+    @Transactional
     public void ongoingById(Long id) {
-        Todo todo = searchById(id);
-        todo.updateState(State.ONGOING);
-        todoRepository.save(todo);
+        Todo findTodo = todoRepository.findById(id)
+                .orElseThrow(() -> {
+                    throw new IllegalArgumentException("존재하지 않는 Todo 입니다.");
+                });
+        findTodo.updateState(State.ONGOING);
     }
 
+    @Transactional
     public void completeById(Long id) {
-        Todo todo = searchById(id);
-        todo.updateState(State.COMPLETE);
-        todoRepository.save(todo);
+        Todo findTodo = todoRepository.findById(id)
+                .orElseThrow(() -> {
+                    throw new IllegalArgumentException("존재하지 않는 Todo 입니다.");
+                });
+        findTodo.updateState(State.COMPLETE);
     }
 
 

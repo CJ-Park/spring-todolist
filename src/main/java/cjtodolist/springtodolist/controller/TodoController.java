@@ -1,6 +1,5 @@
 package cjtodolist.springtodolist.controller;
 
-import cjtodolist.springtodolist.entity.todo.Todo;
 import cjtodolist.springtodolist.service.todos.TodoService;
 import cjtodolist.springtodolist.DTO.TodoDto;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @RestController
@@ -32,9 +30,7 @@ public class TodoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TodoDto> readOne(@PathVariable Long id) {
-        Todo result = todoService.searchById(id);
-        TodoDto response = new TodoDto(result);
-
+        TodoDto response = todoService.searchTodo(id);
         return ResponseEntity.ok(response);
     }
 
@@ -46,10 +42,10 @@ public class TodoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<TodoDto> update(@PathVariable Long id, @RequestBody TodoDto todoDto) {
-        TodoDto response = todoService.updateById(id, todoDto);
+    public ResponseEntity<String> updateContent(@PathVariable Long id, @RequestBody TodoDto todoDto) {
+        todoService.updateContent(id, todoDto);
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok("수정 완료");
     }
 
     @PutMapping("{id}/ongoing")
