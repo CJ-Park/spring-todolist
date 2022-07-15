@@ -1,5 +1,6 @@
 package cjtodolist.springtodolist.controller;
 
+import cjtodolist.springtodolist.entity.todo.Deadline;
 import cjtodolist.springtodolist.service.todos.TodoService;
 import cjtodolist.springtodolist.DTO.TodoDto;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class TodoController {
 
     @PostMapping
     public ResponseEntity<String> create(@RequestBody TodoDto todoDto) {
-        if (ObjectUtils.isEmpty(todoDto.getContent())) {
+        if (ObjectUtils.isEmpty(todoDto.getContent()) || ObjectUtils.isEmpty(todoDto.getDeadline())) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -41,25 +42,53 @@ public class TodoController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/daily")
+    public ResponseEntity<List<TodoDto>> readDaily() {
+        List<TodoDto> response = todoService.searchDaily();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/weekly")
+    public ResponseEntity<List<TodoDto>> readWeekly() {
+        List<TodoDto> response = todoService.searchWeekly();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/monthly")
+    public ResponseEntity<List<TodoDto>> readMonthly() {
+        List<TodoDto> response = todoService.searchMonthly();
+
+        return ResponseEntity.ok(response);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<String> updateContent(@PathVariable Long id, @RequestBody TodoDto todoDto) {
-        todoService.updateContent(id, todoDto);
+        todoService.updateTodo(id, todoDto);
 
-        return ResponseEntity.ok("수정 완료");
+        return ResponseEntity.ok("content / deadline 수정");
+    }
+
+    @PutMapping("{id}/ready")
+    public ResponseEntity<String> ready(@PathVariable Long id) {
+        todoService.readyById(id);
+
+        return ResponseEntity.ok("State 수정 - ONGOING");
     }
 
     @PutMapping("{id}/ongoing")
     public ResponseEntity<String> ongoing(@PathVariable Long id) {
         todoService.ongoingById(id);
 
-        return ResponseEntity.ok("상태 수정 - 진행중");
+        return ResponseEntity.ok("State 수정 - ONGOING");
     }
 
     @PutMapping("/{id}/complete")
     public ResponseEntity<String> complete(@PathVariable Long id) {
         todoService.completeById(id);
 
-        return ResponseEntity.ok("상태 수정 - 완료");
+        return ResponseEntity.ok("State 수정 - COMPLETE");
     }
 
     @DeleteMapping("/{id}")

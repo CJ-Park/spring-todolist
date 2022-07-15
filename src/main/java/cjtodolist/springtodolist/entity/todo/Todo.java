@@ -25,13 +25,17 @@ public class Todo extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
+    private Deadline deadline;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private State state;
 
     // 투두 수정
     public void updateContent(String newContent) {
         this.content = newContent;
     }
-
+    public void updateDeadline(Deadline newDeadline) { this.deadline = newDeadline; }
     public void updateState(State newState) {
         this.state = newState;
     }

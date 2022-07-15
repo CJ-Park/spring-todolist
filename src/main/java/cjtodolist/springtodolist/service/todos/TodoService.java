@@ -1,5 +1,6 @@
 package cjtodolist.springtodolist.service.todos;
 
+import cjtodolist.springtodolist.entity.todo.Deadline;
 import cjtodolist.springtodolist.entity.todo.State;
 import cjtodolist.springtodolist.entity.todo.Todo;
 import cjtodolist.springtodolist.entity.todo.TodoRepository;
@@ -22,6 +23,7 @@ public class TodoService {
     public void add(TodoDto todoDto) {
         Todo todo = Todo.builder()
                 .content(todoDto.getContent())
+                .deadline(todoDto.getDeadline())
                 .state(State.READY)
                 .build();
         todoRepository.save(todo);
@@ -37,18 +39,61 @@ public class TodoService {
 
     public List<TodoDto> searchAll() {
         List<Todo> all = todoRepository.findAll();
+        if(all.isEmpty()) {
+            throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
+        }
         return all.stream()
                 .map(result -> new TodoDto(result))
                 .collect(Collectors.toList());
     }
 
+    public List<TodoDto> searchDaily() {
+        List<Todo> findTodos = todoRepository.findByDeadline(Deadline.DAILY);
+        if(findTodos.isEmpty()) {
+            throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
+        }
+        return findTodos.stream()
+                .map(result -> new TodoDto(result))
+                .collect(Collectors.toList());
+    }
+
+    public List<TodoDto> searchWeekly() {
+        List<Todo> findTodos = todoRepository.findByDeadline(Deadline.WEEKLY);
+        if(findTodos.isEmpty()) {
+            throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
+        }
+        return findTodos.stream()
+                .map(result -> new TodoDto(result))
+                .collect(Collectors.toList());
+    }
+
+    public List<TodoDto> searchMonthly() {
+        List<Todo> findTodos = todoRepository.findByDeadline(Deadline.MONTHLY);
+        if(findTodos.isEmpty()) {
+            throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
+        }
+        return findTodos.stream()
+                .map(result -> new TodoDto(result))
+                .collect(Collectors.toList());
+    }
+
     @Transactional
-    public void updateContent(Long id, TodoDto todoDto) {
+    public void updateTodo(Long id, TodoDto todoDto) {
         Todo findTodo = todoRepository.findById(id)
                 .orElseThrow(() -> {
                     throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
                 });
         findTodo.updateContent(todoDto.getContent());
+        findTodo.updateDeadline(todoDto.getDeadline());
+    }
+
+    @Transactional
+    public void readyById(Long id) {
+        Todo findTodo = todoRepository.findById(id)
+                .orElseThrow(() -> {
+                    throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
+                });
+        findTodo.updateState(State.READY);
     }
 
     @Transactional
