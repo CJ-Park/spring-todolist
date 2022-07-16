@@ -38,6 +38,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String nickname;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Todo> todos = new ArrayList<>();
+
     @Enumerated(EnumType.STRING)
     private Admin admin;
 

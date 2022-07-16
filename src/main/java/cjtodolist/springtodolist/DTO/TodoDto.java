@@ -15,12 +15,14 @@ import lombok.NoArgsConstructor;
 public class TodoDto {
     private Long id;
     private String content;
+    private String username;
     private Deadline deadline;
     private State state;
 
     public TodoDto(Todo todo) {
         this.id = todo.getId();
         this.content = todo.getContent();
+        this.username = todo.getUser().getUsername();
         this.deadline = todo.getDeadline();
         this.state = todo.getState();
     }

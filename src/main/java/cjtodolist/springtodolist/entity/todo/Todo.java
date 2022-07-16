@@ -1,6 +1,7 @@
 package cjtodolist.springtodolist.entity.todo;
 
 import cjtodolist.springtodolist.entity.BaseTimeEntity;
+import cjtodolist.springtodolist.entity.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,6 +31,10 @@ public class Todo extends BaseTimeEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private State state;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
 
     // 투두 수정
     public void updateContent(String newContent) {

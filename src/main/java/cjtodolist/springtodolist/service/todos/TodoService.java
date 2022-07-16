@@ -5,6 +5,8 @@ import cjtodolist.springtodolist.entity.todo.State;
 import cjtodolist.springtodolist.entity.todo.Todo;
 import cjtodolist.springtodolist.entity.todo.TodoRepository;
 import cjtodolist.springtodolist.DTO.TodoDto;
+import cjtodolist.springtodolist.entity.user.User;
+import cjtodolist.springtodolist.entity.user.UserRepository;
 import cjtodolist.springtodolist.handleError.error.ErrorCode;
 import cjtodolist.springtodolist.handleError.exception.NotExistsException;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +21,16 @@ import java.util.stream.Collectors;
 @Service
 public class TodoService {
     private final TodoRepository todoRepository;
+    private final UserRepository userRepository;
 
     public void add(TodoDto todoDto) {
+        User findUser = userRepository.findByUsername(todoDto.getUsername())
+                .orElseThrow(() -> {
+                    throw new NotExistsException("존재하지 않는 User", ErrorCode.NOT_EXIST_ERROR);
+                });
         Todo todo = Todo.builder()
                 .content(todoDto.getContent())
+                .user(findUser)
                 .deadline(todoDto.getDeadline())
                 .state(State.READY)
                 .build();
@@ -39,7 +47,7 @@ public class TodoService {
 
     public List<TodoDto> searchAll() {
         List<Todo> all = todoRepository.findAll();
-        if(all.isEmpty()) {
+        if (all.isEmpty()) {
             throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
         }
         return all.stream()
@@ -49,7 +57,7 @@ public class TodoService {
 
     public List<TodoDto> searchDaily() {
         List<Todo> findTodos = todoRepository.findByDeadline(Deadline.DAILY);
-        if(findTodos.isEmpty()) {
+        if (findTodos.isEmpty()) {
             throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
         }
         return findTodos.stream()
@@ -59,7 +67,7 @@ public class TodoService {
 
     public List<TodoDto> searchWeekly() {
         List<Todo> findTodos = todoRepository.findByDeadline(Deadline.WEEKLY);
-        if(findTodos.isEmpty()) {
+        if (findTodos.isEmpty()) {
             throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
         }
         return findTodos.stream()
@@ -69,7 +77,7 @@ public class TodoService {
 
     public List<TodoDto> searchMonthly() {
         List<Todo> findTodos = todoRepository.findByDeadline(Deadline.MONTHLY);
-        if(findTodos.isEmpty()) {
+        if (findTodos.isEmpty()) {
             throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
         }
         return findTodos.stream()
