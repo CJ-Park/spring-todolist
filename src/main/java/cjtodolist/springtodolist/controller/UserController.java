@@ -6,6 +6,8 @@ import cjtodolist.springtodolist.DTO.UserDto;
 import cjtodolist.springtodolist.service.users.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
@@ -23,9 +25,8 @@ public class UserController {
 
     // 회원 투두 조회
     @GetMapping("/{id}")
-    public ResponseEntity<List<TodoDto>> userTodo(@PathVariable Long id) {
-        List<TodoDto> response = userService.getTodos(id);
-        return ResponseEntity.ok(response);
+    public Page<TodoDto> userTodo(Pageable pageable, @PathVariable Long id) {
+        return userService.getTodos(pageable, id);
     }
 
     // 비밀번호 수정

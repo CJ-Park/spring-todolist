@@ -1,10 +1,14 @@
 package cjtodolist.springtodolist.controller;
 
+import cjtodolist.springtodolist.DTO.TodoDeadlineDto;
+import cjtodolist.springtodolist.DTO.TodoStateDto;
 import cjtodolist.springtodolist.entity.todo.Deadline;
 import cjtodolist.springtodolist.service.todos.TodoService;
 import cjtodolist.springtodolist.DTO.TodoDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
@@ -36,31 +40,13 @@ public class TodoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TodoDto>> readAll() {
-        List<TodoDto> response = todoService.searchAll();
-
-        return ResponseEntity.ok(response);
+    public Page<TodoDto> readAll(Pageable pageable) {
+        return todoService.getTodoList(pageable);
     }
 
-    @GetMapping("/daily")
-    public ResponseEntity<List<TodoDto>> readDaily() {
-        List<TodoDto> response = todoService.searchDaily();
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/weekly")
-    public ResponseEntity<List<TodoDto>> readWeekly() {
-        List<TodoDto> response = todoService.searchWeekly();
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/monthly")
-    public ResponseEntity<List<TodoDto>> readMonthly() {
-        List<TodoDto> response = todoService.searchMonthly();
-
-        return ResponseEntity.ok(response);
+    @GetMapping("/deadline")
+    public Page<TodoDto> readByDeadline(Pageable pageable, @RequestBody TodoDeadlineDto dto) {
+        return todoService.searchByDeadline(pageable, dto);
     }
 
     @PutMapping("/{id}")
@@ -70,25 +56,11 @@ public class TodoController {
         return ResponseEntity.ok("content / deadline 수정");
     }
 
-    @PutMapping("{id}/ready")
-    public ResponseEntity<String> ready(@PathVariable Long id) {
-        todoService.readyById(id);
+    @PutMapping("{id}/state")
+    public ResponseEntity<String> updateState(@PathVariable Long id, @RequestBody TodoStateDto dto) {
+        todoService.updateState(id, dto);
 
-        return ResponseEntity.ok("State 수정 - ONGOING");
-    }
-
-    @PutMapping("{id}/ongoing")
-    public ResponseEntity<String> ongoing(@PathVariable Long id) {
-        todoService.ongoingById(id);
-
-        return ResponseEntity.ok("State 수정 - ONGOING");
-    }
-
-    @PutMapping("/{id}/complete")
-    public ResponseEntity<String> complete(@PathVariable Long id) {
-        todoService.completeById(id);
-
-        return ResponseEntity.ok("State 수정 - COMPLETE");
+        return ResponseEntity.ok("State 수정");
     }
 
     @DeleteMapping("/{id}")

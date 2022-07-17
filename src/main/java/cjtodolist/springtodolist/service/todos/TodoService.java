@@ -1,6 +1,7 @@
 package cjtodolist.springtodolist.service.todos;
 
-import cjtodolist.springtodolist.entity.todo.Deadline;
+import cjtodolist.springtodolist.DTO.TodoDeadlineDto;
+import cjtodolist.springtodolist.DTO.TodoStateDto;
 import cjtodolist.springtodolist.entity.todo.State;
 import cjtodolist.springtodolist.entity.todo.Todo;
 import cjtodolist.springtodolist.entity.todo.TodoRepository;
@@ -10,12 +11,10 @@ import cjtodolist.springtodolist.entity.user.UserRepository;
 import cjtodolist.springtodolist.handleError.error.ErrorCode;
 import cjtodolist.springtodolist.handleError.exception.NotExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 
 @RequiredArgsConstructor
 @Service
@@ -23,6 +22,7 @@ public class TodoService {
     private final TodoRepository todoRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void add(TodoDto todoDto) {
         User findUser = userRepository.findByUsername(todoDto.getUsername())
                 .orElseThrow(() -> {
@@ -37,6 +37,7 @@ public class TodoService {
         todoRepository.save(todo);
     }
 
+    @Transactional
     public TodoDto searchTodo(Long id) {
         Todo findTodo = todoRepository.findById(id)
                 .orElseThrow(() -> {
@@ -45,44 +46,31 @@ public class TodoService {
         return new TodoDto(findTodo);
     }
 
-    public List<TodoDto> searchAll() {
-        List<Todo> all = todoRepository.findAll();
-        if (all.isEmpty()) {
-            throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
-        }
-        return all.stream()
-                .map(result -> new TodoDto(result))
-                .collect(Collectors.toList());
+    @Transactional
+    public Page<TodoDto> getTodoList(Pageable pageable) {
+        Page<Todo> todoList = todoRepository.findAll(pageable);
+
+        Page<TodoDto> pagingTodoList = todoList.map(
+                todo -> new TodoDto(
+                        todo.getId(), todo.getContent(),
+                        todo.getUser().getUsername(), todo.getDeadline(),
+                        todo.getState()
+                )
+        );
+        return pagingTodoList;
     }
 
-    public List<TodoDto> searchDaily() {
-        List<Todo> findTodos = todoRepository.findByDeadline(Deadline.DAILY);
-        if (findTodos.isEmpty()) {
-            throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
-        }
-        return findTodos.stream()
-                .map(result -> new TodoDto(result))
-                .collect(Collectors.toList());
-    }
-
-    public List<TodoDto> searchWeekly() {
-        List<Todo> findTodos = todoRepository.findByDeadline(Deadline.WEEKLY);
-        if (findTodos.isEmpty()) {
-            throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
-        }
-        return findTodos.stream()
-                .map(result -> new TodoDto(result))
-                .collect(Collectors.toList());
-    }
-
-    public List<TodoDto> searchMonthly() {
-        List<Todo> findTodos = todoRepository.findByDeadline(Deadline.MONTHLY);
-        if (findTodos.isEmpty()) {
-            throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
-        }
-        return findTodos.stream()
-                .map(result -> new TodoDto(result))
-                .collect(Collectors.toList());
+    @Transactional
+    public Page<TodoDto> searchByDeadline(Pageable pageable, TodoDeadlineDto dto) {
+        Page<Todo> findTodos = todoRepository.findByDeadline(pageable, dto.getDeadline());
+        Page<TodoDto> findTodoDtos = findTodos.map(
+                todo -> new TodoDto(
+                        todo.getId(), todo.getContent(),
+                        todo.getUser().getUsername(), todo.getDeadline(),
+                        todo.getState()
+                )
+        );
+        return findTodoDtos;
     }
 
     @Transactional
@@ -96,32 +84,13 @@ public class TodoService {
     }
 
     @Transactional
-    public void readyById(Long id) {
+    public void updateState(Long id, TodoStateDto dto) {
         Todo findTodo = todoRepository.findById(id)
                 .orElseThrow(() -> {
                     throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
                 });
-        findTodo.updateState(State.READY);
+        findTodo.updateState(dto.getState());
     }
-
-    @Transactional
-    public void ongoingById(Long id) {
-        Todo findTodo = todoRepository.findById(id)
-                .orElseThrow(() -> {
-                    throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
-                });
-        findTodo.updateState(State.ONGOING);
-    }
-
-    @Transactional
-    public void completeById(Long id) {
-        Todo findTodo = todoRepository.findById(id)
-                .orElseThrow(() -> {
-                    throw new NotExistsException("존재하지 않는 Todo", ErrorCode.NOT_EXIST_ERROR);
-                });
-        findTodo.updateState(State.COMPLETE);
-    }
-
 
     public void deleteById(Long id) {
         todoRepository.deleteById(id);

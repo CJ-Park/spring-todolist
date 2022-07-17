@@ -12,13 +12,15 @@ import cjtodolist.springtodolist.handleError.exception.IdDuplicateException;
 import cjtodolist.springtodolist.handleError.exception.LoginFailedException;
 import cjtodolist.springtodolist.handleError.exception.NotExistsException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-// 에러 커스텀하기
 @RequiredArgsConstructor
 @Service
 public class UserService {
@@ -76,14 +78,20 @@ public class UserService {
         userRepository.delete(deleteUser);
     }
 
-    public List<TodoDto> getTodos(Long id) {
+    public Page<TodoDto> getTodos(Pageable pageable, Long id) {
         User findUser = userRepository.findById(id)
-                .orElseThrow(()-> {
+                .orElseThrow(() -> {
                     throw new NotExistsException("존재하지 않는 ID", ErrorCode.NOT_EXIST_ERROR);
                 });
         List<Todo> todos = findUser.getTodos();
-        return todos.stream()
-                .map(result -> new TodoDto(result))
-                .collect(Collectors.toList());
+        Page<Todo> pageTodo = new PageImpl<>(todos, pageable, todos.size());
+        Page<TodoDto> pageDto = pageTodo.map(
+                todo -> new TodoDto(
+                        todo.getId(), todo.getContent(),
+                        todo.getUser().getUsername(), todo.getDeadline(),
+                        todo.getState()
+                )
+        );
+        return pageDto;
     }
 }
