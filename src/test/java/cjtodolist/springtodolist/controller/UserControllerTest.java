@@ -93,100 +93,100 @@ class UserControllerTest {
                 .andDo(print());
     }
 
-    @DisplayName("로그인 실패 테스트 1")
-    @Test
-    public void 로그인실패_비밀번호() throws Exception {
-        //given
-        String username = "test";
-        String password = "1234";
-        String nickname = "CJ";
+//    @DisplayName("로그인 실패 테스트 1")
+//    @Test
+//    public void 로그인실패_비밀번호() throws Exception {
+//        //given
+//        String username = "test";
+//        String password = "1234";
+//        String nickname = "CJ";
+//
+//        String wrongPass = "4321";
+//
+//        userRepository.save(User.builder().username(username).nickname(nickname)
+//                .password(passwordEncoder.encode(password)).build());
+//
+//        UserDto userDto = UserDto.builder().username(username).password(wrongPass).build();
+//
+//        //when then
+//        mvc.perform(post("/login")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(userDto)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().string("비밀번호가 다릅니다."));
+//    }
+//
+//    @DisplayName("로그인 실패 테스트 2")
+//    @Test
+//    public void 로그인실패_아이디() throws Exception {
+//        //given
+//        String username = "test";
+//        String password = "1234";
+//        String nickname = "CJ";
+//
+//        String wrongUsername = "justTest";
+//
+//        userRepository.save(User.builder().username(username).nickname(nickname)
+//                .password(passwordEncoder.encode(password)).build());
+//
+//        UserDto userDto = UserDto.builder().username(wrongUsername).password(password).build();
+//
+//        //when then
+//        mvc.perform(post("/login")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(userDto)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(content().string("존재하지 않는 username 입니다."));
+//    }
 
-        String wrongPass = "4321";
 
-        userRepository.save(User.builder().username(username).nickname(nickname)
-                .password(passwordEncoder.encode(password)).build());
-
-        UserDto userDto = UserDto.builder().username(username).password(wrongPass).build();
-
-        //when then
-        mvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("비밀번호가 다릅니다."));
-    }
-
-    @DisplayName("로그인 실패 테스트 2")
-    @Test
-    public void 로그인실패_아이디() throws Exception {
-        //given
-        String username = "test";
-        String password = "1234";
-        String nickname = "CJ";
-
-        String wrongUsername = "justTest";
-
-        userRepository.save(User.builder().username(username).nickname(nickname)
-                .password(passwordEncoder.encode(password)).build());
-
-        UserDto userDto = UserDto.builder().username(wrongUsername).password(password).build();
-
-        //when then
-        mvc.perform(post("/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isBadRequest())
-                .andExpect(content().string("존재하지 않는 username 입니다."));
-    }
-
-
-    @DisplayName("비밀번호 변경 테스트")
-    @Test
-    public void 비밀번호변경() throws Exception {
-        //given
-        String username = "test";
-        String password = "1234";
-        String nickname = "CJ";
-
-        String newPassword = "4321";
-
-        userRepository.save(User.builder().username(username).nickname(nickname)
-                .password(passwordEncoder.encode(password)).build());
-
-        UserDto userDto = UserDto.builder().username(username).password(newPassword).build();
-
-        //when then
-        mvc.perform(put("/pw-change")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("비밀번호가 변경되었습니다."));
-
-        assertThat(passwordEncoder.matches(newPassword, userRepository.findByUsername(username).get().getPassword()))
-                .isTrue();
-    }
-
-    @DisplayName("회원탈퇴 테스트")
-    @Test
-    public void 회원탈퇴() throws Exception {
-        //given
-        String username = "test";
-        String password = "1234";
-        String nickname = "CJ";
-
-        userRepository.save(User.builder().username(username).nickname(nickname)
-                .password(passwordEncoder.encode(password)).build());
-
-        UserDto userDto = UserDto.builder().username(username).password(password).build();
-
-        //when then
-        mvc.perform(delete("/quit")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("정상적으로 탈퇴 완료되었습니다."));
-
-        assertThat(userRepository.findByUsername(username)).isEmpty();
-    }
+//    @DisplayName("비밀번호 변경 테스트")
+//    @Test
+//    public void 비밀번호변경() throws Exception {
+//        //given
+//        String username = "test";
+//        String password = "1234";
+//        String nickname = "CJ";
+//
+//        String newPassword = "4321";
+//
+//        userRepository.save(User.builder().username(username).nickname(nickname)
+//                .password(passwordEncoder.encode(password)).build());
+//
+//        UserDto userDto = UserDto.builder().username(username).password(newPassword).build();
+//
+//        //when then
+//        mvc.perform(put("/pw-change")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(userDto)))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string("비밀번호가 변경되었습니다."));
+//
+//        assertThat(passwordEncoder.matches(newPassword, userRepository.findByUsername(username).get().getPassword()))
+//                .isTrue();
+//    }
+//
+//    @DisplayName("회원탈퇴 테스트")
+//    @Test
+//    public void 회원탈퇴() throws Exception {
+//        //given
+//        String username = "test";
+//        String password = "1234";
+//        String nickname = "CJ";
+//
+//        userRepository.save(User.builder().username(username).nickname(nickname)
+//                .password(passwordEncoder.encode(password)).build());
+//
+//        UserDto userDto = UserDto.builder().username(username).password(password).build();
+//
+//        //when then
+//        mvc.perform(delete("/quit")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(userDto)))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string("정상적으로 탈퇴 완료되었습니다."));
+//
+//        assertThat(userRepository.findByUsername(username)).isEmpty();
+//    }
 
 }
