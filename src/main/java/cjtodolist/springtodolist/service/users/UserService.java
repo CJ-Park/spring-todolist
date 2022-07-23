@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +30,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
+    @Transactional
     public void add(UserJoinDto userJoinDto) {
         User user = User.builder()
                 .username(userJoinDto.getUsername())
@@ -41,6 +43,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public String validateUser(UserDto userDto) {
         User findUser = userRepository.findByUsername(userDto.getUsername())
                 .orElseThrow(() -> {
@@ -52,12 +55,14 @@ public class UserService {
         return jwtTokenProvider.createToken(findUser.getUsername(), findUser.getRoles());
     }
 
+    @Transactional
     public void isDuplicatedUser(UserJoinDto userJoinDto) {
         if (userRepository.findByUsername(userJoinDto.getUsername()).isPresent()) {
             throw new IdDuplicateException("이미 사용중인 ID", ErrorCode.ID_DUPLICATION);
         }
     }
 
+    @Transactional
     public void update(UserDto userDto) {
         User updateUser = userRepository.findByUsername(userDto.getUsername())
                 .orElseThrow(() -> {
@@ -67,6 +72,7 @@ public class UserService {
         userRepository.save(updateUser);
     }
 
+    @Transactional
     public void delete(UserDto userDto) {
         User deleteUser = userRepository.findByUsername(userDto.getUsername())
                 .orElseThrow(() -> {
@@ -78,6 +84,7 @@ public class UserService {
         userRepository.delete(deleteUser);
     }
 
+    @Transactional
     public Page<TodoDto> getTodos(Pageable pageable, Long id) {
         User findUser = userRepository.findById(id)
                 .orElseThrow(() -> {

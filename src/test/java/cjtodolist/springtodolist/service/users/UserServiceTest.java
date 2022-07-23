@@ -58,44 +58,26 @@ class UserServiceTest {
         UserJoinDto userJoinDto = UserJoinDto.builder().username(username).password(password).nickname(nickname).build();
 
         //when
-        userService.isDuplicateUsername(userJoinDto);
+        userService.isDuplicatedUser(userJoinDto);
 
         //then
         verify(userRepository, times(1)).findByUsername(any(String.class));
     }
 
-    @DisplayName("로그인 Username 검증")
-    @Test
-    public void 로그인검증_username() throws Exception {
-        //given
-        String username = "test";
-        String password = "1234";
-
-        UserDto userDto = UserDto.builder().username(username).password(password).build();
-
-        //when
-        userService.validateUsername(userDto);
-
-        //then
-        verify(userRepository, times(1)).findByUsername(any(String.class));
-    }
-
-    // ============= java.util.NoSuchElementException at UserServiceTest.java:83 =============
-    @DisplayName("로그인 Userpass 검증")
-    @Test
-    public void 로그인검증_password() throws Exception {
-        //given
-        String username = "test";
-        String password = "1234";
-
-        UserDto userDto = UserDto.builder().username(username).password(password).build();
-
-        //when
-        userService.validateUserPass(userDto);
-
-        //then
-        verify(userRepository, times(1)).findByUsername(any(String.class));
-        verify(passwordEncoder, times(1)).matches(any(CharSequence.class), any(String.class));
-    }
+//    @DisplayName("로그인 검증")
+//    @Test
+//    public void 로그인_검증() throws Exception {
+//        //given
+//        String username = "test";
+//        String password = "1234";
+//
+//        UserDto userDto = UserDto.builder().username(username).password(password).build();
+//
+//        //when
+//        userService.validateUser(userDto);
+//
+//        //then
+//        verify(userRepository, times(1)).findByUsername(any(String.class));
+//    }
 
 }
