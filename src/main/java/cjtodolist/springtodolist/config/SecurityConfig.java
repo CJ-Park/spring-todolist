@@ -35,7 +35,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.httpBasic().disable() // rest api 만을 확인 => 기본설정 해제
                 .authorizeRequests() // 요청에 대한 권한 체크
-                .antMatchers("/test").authenticated()
                 .antMatchers("/todo").authenticated()
                 .antMatchers("/todo/**").authenticated()
                 .antMatchers("/admin/**").hasRole("ADMIN")
